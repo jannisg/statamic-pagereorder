@@ -4,15 +4,57 @@
     /* Feature Tests
     */
 
-    var $sortable, $subs, $tree, active_class, eligible_class, hasDragAndDrop, icon_markup, ignore_class, namespace;
+    var $flashBar, $sortable, $subs, $tree, active_class, eligible_class, flashes, hasDragAndDrop, icon_markup, ignore_class, namespace, useAjax;
 
     hasDragAndDrop = 'draggable' in document.createElement('span');
     if (!hasDragAndDrop) {
       return false;
     }
+    /* Setup Flash Message JS Helper
+    */
+
+    /* Store Success/Error Templates.
+    */
+
+    flashes = {
+      success: _.template("<div id=\"flash-msg\" class=\"success\">\n  <span class=\"icon\">8</span>\n  <span class=\"msg\"><%= message %></p>\n</div>"),
+      error: _.template("<div id=\"flash-msg\" class=\"error\">\n  <span class=\"icon\">c</span>\n  <span class=\"msg\"><%= message %></p>\n</div>")
+    };
+    /* Cache the container.
+    */
+
+    $flashBar = $('#status-bar');
+    /* Setup an event based system for showing flashes.
+    */
+
+    $flashBar.on('flash', function(e, data) {
+      var $existingMessage, delay, html;
+
+      delay = 50;
+      if ($('#flash-msg').length) {
+        delay = 150;
+        $existingMessage = $('#flash-msg');
+        $existingMessage.stop(true).fadeOut(delay, function() {
+          return $existingMessage.remove();
+        });
+      }
+      html = flashes[data.status]({
+        message: data.message
+      });
+      $flashBar.prepend(html);
+      $('#flash-msg').delay(delay).animate({
+        'margin-top': '0'
+      }, 900, 'easeOutBounce').delay(3000).animate({
+        'margin-top': '-74px'
+      }, 900, 'easeInOutBack', function() {
+        return $(this).remove();
+      });
+      return void 0;
+    });
     /* Vars
     */
 
+    useAjax = true;
     $tree = $('#page-tree');
     $subs = $tree.find('.subpages');
     namespace = 'page-order';
@@ -48,11 +90,17 @@
     return $sortable.on({
       'dragstart': function(e) {
         $tree.addClass(active_class);
-        return $subs.slideUp();
+        return $subs.slideUp({
+          duration: 350,
+          easing: 'easeInExpo'
+        });
       },
       'dragend': function(e) {
         $tree.removeClass(active_class);
-        return $subs.slideDown();
+        return $subs.slideDown({
+          duration: 700,
+          easing: 'easeOutExpo'
+        });
       },
       'sortupdate': function(e) {
         var $page, location, order, orderJSON, page, pages, url;
@@ -73,9 +121,31 @@
           return _results;
         })();
         orderJSON = JSON.stringify(order);
-        location = window.location;
-        url = "" + location.protocol + "//" + location.host;
-        window.location = "" + url + "/TRIGGER/pagereorder/reorder_folders?order=" + orderJSON;
+        if (useAjax) {
+          url = '/TRIGGER/pagereorder/reorder_folders';
+          $.ajax(url, {
+            type: 'GET',
+            data: {
+              order: orderJSON
+            },
+            success: function(data, status, jqxhr) {
+              return $flashBar.triggerHandler('flash', {
+                status: 'success',
+                message: 'Page order saved successfully!'
+              });
+            },
+            error: function(jqxhr, status, error) {
+              return $flashBar.triggerHandler('flash', {
+                status: 'error',
+                message: 'There was an error saving your page order. Please try again or ask for help in the forums.'
+              });
+            }
+          });
+        } else {
+          location = window.location;
+          url = "" + location.protocol + "//" + location.host + "/TRIGGER/pagereorder/reorder_folders?order=" + orderJSON;
+          window.location = url;
+        }
         return void 0;
       }
     });

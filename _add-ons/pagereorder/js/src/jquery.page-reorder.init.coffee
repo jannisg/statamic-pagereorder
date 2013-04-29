@@ -6,7 +6,60 @@ $ ->
   # Bail if we don't have a device that supports the HTML5 Drag and Drop API
   return false unless hasDragAndDrop
 
+  ### Setup Flash Message JS Helper ###
+
+  ### Store Success/Error Templates. ###
+  flashes =
+    success: _.template """
+                        <div id="flash-msg" class="success">
+                          <span class="icon">8</span>
+                          <span class="msg"><%= message %></p>
+                        </div>
+                        """
+    error:   _.template """
+                        <div id="flash-msg" class="error">
+                          <span class="icon">c</span>
+                          <span class="msg"><%= message %></p>
+                        </div>
+                        """
+
+  ### Cache the container. ###
+  $flashBar = $ '#status-bar'
+
+  ### Setup an event based system for showing flashes. ###
+  $flashBar.on 'flash', (e, data) ->
+
+    # delay for the appearance of the new flash message.
+    delay = 50
+
+    # Check if we have any existing messages, if so remove them.
+    if $('#flash-msg').length
+      # Increase the delay to be the fadeOut animation time.
+      delay = 150
+      # Remove existing flash message by fading it out.
+      $existingMessage = $ '#flash-msg'
+      $existingMessage.stop(true).fadeOut delay, ->
+        $existingMessage.remove()
+
+    # Generate markup with template.
+    html = flashes[data.status]({message: data.message})
+
+    # Add markup to the container
+    $flashBar.prepend html
+
+    # Animate the message.
+    $('#flash-msg')
+      .delay(delay)
+      .animate({'margin-top' : '0'}, 900, 'easeOutBounce')
+      .delay(3000)
+      .animate {'margin-top' : '-74px'}, 900, 'easeInOutBack', ->
+        $(@).remove()
+
+    undefined
+
   ### Vars ###
+  useAjax  = yes
+
   $tree = $('#page-tree')
   $subs = $tree.find('.subpages')
 
@@ -52,14 +105,14 @@ $ ->
       $tree.addClass active_class
 
       # Hide subpages
-      $subs.slideUp()
+      $subs.slideUp duration: 350, easing: 'easeInExpo'
 
     'dragend': (e) ->
       # Remove active class to $tree.
       $tree.removeClass active_class
 
       # Show subpages
-      $subs.slideDown()
+      $subs.slideDown duration: 700, easing: 'easeOutExpo'
 
     'sortupdate': (e) ->
       # console.log "Sorting..."
@@ -75,20 +128,35 @@ $ ->
       # Store a JSON String of our new order.
       orderJSON = JSON.stringify order
 
-      # Build a URL to ping.
-      location = window.location
-      url = "#{location.protocol}//#{location.host}"
+      if useAjax
+        # Send JSON to PHP function using AJAX
+        url = '/TRIGGER/pagereorder/reorder_folders'
 
-      # Action the request to trigger the reodering.
-      window.location = "#{url}/TRIGGER/pagereorder/reorder_folders?order=#{orderJSON}"
+        $.ajax url,
+          type: 'GET'
+          data:
+            order: orderJSON
+          success: (data, status, jqxhr) ->
+            # Show Flash Message.
+            $flashBar.triggerHandler 'flash',
+              status: 'success',
+              message: 'Page order saved successfully!'
 
-      # Send JSON to PHP function.
-      # $.ajax '/TRIGGER/ordash/reorder_folders',
-      #   type: 'POST'
-      #   data:
-      #     order: orderJSON
-      #   complete: (jqxhr, status) ->
-      #     console.log "Complete:", jqxhr, status
+          error: (jqxhr, status, error) ->
+            # Show Flash Message.
+            $flashBar.triggerHandler 'flash',
+              status: 'error',
+              message: 'There was an error saving your page order. Please try again or ask for help in the forums.'
+
+      else
+        # Use window.location based routing.
+
+        # Build a URL to ping.
+        location = window.location
+        url = "#{location.protocol}//#{location.host}/TRIGGER/pagereorder/reorder_folders?order=#{orderJSON}"
+
+        # Action the request to trigger the reodering.
+        window.location = url
 
       undefined
 

@@ -1,6 +1,6 @@
 # Statamic: Page Reorder
 
-Adds drag and drop reordering of the top-level pages to your [Statamic](http://statamic.com/) control panel's "Pages" page.
+Adds AJAX drag and drop reordering of the top-level pages to your [Statamic](http://statamic.com/) control panel's "Pages" page.
 
 ## Installation
 
@@ -9,7 +9,7 @@ Adds drag and drop reordering of the top-level pages to your [Statamic](http://s
 
 ## Requirements
 
-1. This add-on makes use of **jQuery**. (jQuery is bundled and loaded by Statamic so this shouldn't be an issue)
+1. This add-on makes use of **jQuery** and **Underscore.js**. Both are bundled and loaded by Statamic so this shouldn't be an issue I presume.
 2. The drag and drop is using the native **HTML5 drag and drop API** so if your browser doesn't support `draganddrop` then things aren't going to work… if there is a need for it I could look into falling back to something like jQuery UI: Sortable for older browsers.
 
 ## What should you expect
