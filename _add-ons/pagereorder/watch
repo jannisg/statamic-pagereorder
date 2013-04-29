@@ -1,0 +1,2 @@
+# Watch the CoffeeScript src files.
+coffee -cwl js/src/*.coffee;
