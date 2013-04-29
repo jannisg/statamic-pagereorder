@@ -1,5 +1,11 @@
 $ ->
 
+  ### Feature Tests ###
+  hasDragAndDrop = ('draggable' of document.createElement('span') )
+
+  # Bail if we don't have a device that supports the HTML5 Drag and Drop API
+  return false unless hasDragAndDrop
+
   ### Vars ###
   $tree = $('#page-tree')
   $subs = $tree.find('.subpages')
@@ -61,12 +67,20 @@ $ ->
 
       # Create array of objects storing our new order.
       order = for page in pages
+        $page = $ page
 
-        index: $(page).index()
-        url  : $.trim $(page).find('.slug-preview').first().text()
+        index: $page.index()
+        url  : $.trim $page.find('.slug-preview').first().text()
 
       # Store a JSON String of our new order.
       orderJSON = JSON.stringify order
+
+      # Build a URL to ping.
+      location = window.location
+      url = "#{location.protocol}//#{location.host}"
+
+      # Action the request to trigger the reodering.
+      window.location = "#{url}/TRIGGER/pagereorder/reorder_folders?order=#{orderJSON}"
 
       # Send JSON to PHP function.
       # $.ajax '/TRIGGER/ordash/reorder_folders',
@@ -75,9 +89,6 @@ $ ->
       #     order: orderJSON
       #   complete: (jqxhr, status) ->
       #     console.log "Complete:", jqxhr, status
-
-      # For testing we'll use a url redirect with GET vars.
-      window.location = "#{window.location.origin}/TRIGGER/pagereorder/reorder_folders?order=#{orderJSON}"
 
       undefined
 
