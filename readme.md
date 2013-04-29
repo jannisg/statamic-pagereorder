@@ -48,3 +48,7 @@ Because the actual API documentation isn't launched until Statamic hits version 
 I haven't written much PHP code, usually working on more front-end related things, so if you know PHP I would love for you to review my existing code and let me know about any mistakes I may have made or how to improve any of the code in this add-on.
 
 Also, I welcome any pull-requests to this add-on and would be happy to merge them into this add-on. When you send a pull-request however please be sure to comment your code so I can follow it more easily.
+
+## License
+
+This add-on is released under the MIT license.
