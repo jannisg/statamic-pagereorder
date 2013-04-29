@@ -9,8 +9,18 @@ Adds AJAX drag and drop reordering of the top-level pages to your [Statamic](htt
 
 ## Requirements
 
-1. This add-on makes use of **jQuery** and **Underscore.js**. Both are bundled and loaded by Statamic so this shouldn't be an issue I presume.
-2. The drag and drop is using the native **HTML5 drag and drop API** so if your browser doesn't support `draganddrop` then things aren't going to work… if there is a need for it I could look into falling back to something like jQuery UI: Sortable for older browsers.
+This add-on makes use of:
+
+1. **jQuery**
+2. **jQuery.easing**
+3. **Underscore.js**
+4. **HTML5 drag and drop API**.
+
+jQuery, jQuery.easing and Underscore.js are all part of Statamics normal payload so we're just using what's already available there.
+
+The drag and drop however needs the native HTML5 drag and drop api to work. If your browser doesn't support this then things aren't going to work…
+
+If there is a need for it, I could look at adding fall back support for this using something like jQuery UI: Sortable for older browsers.
 
 ## What should you expect
 
