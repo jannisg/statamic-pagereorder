@@ -49,6 +49,10 @@ I haven't written much PHP code, usually working on more front-end related thing
 
 Also, I welcome any pull-requests to this add-on and would be happy to merge them into this add-on. When you send a pull-request however please be sure to comment your code so I can follow it more easily.
 
+## Attributions
+
+This add-on uses the [HTML5 Sortable](https://github.com/farhadi/html5sortable/) plugin.
+
 ## License
 
 This add-on is released under the MIT license.
