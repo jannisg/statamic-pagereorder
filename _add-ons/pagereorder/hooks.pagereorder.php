@@ -4,23 +4,31 @@ class Hooks_pagereorder extends Hooks {
   /**
    *  We'll add our CSS styles to the head here.
    */
-  function add_to_control_panel_head() {
-    $html = self::include_css('page-reorder.min.css');
-    return $html;
+  public function add_to_control_panel_head() {
+    // Check that we're on the correct page before loading assets.
+    if ( self::current_route() == 'pages' ) {
+      return self::include_css('page-reorder.min.css');
+    } else {
+      return "";
+    }
   }
 
   /**
    *  We'll add our JavaScript just before the </body> tag.
    */
-  function add_to_control_panel_foot() {
-    $html = self::include_js('jquery.page-reorder.min.js');
-    return $html;
+  public function add_to_control_panel_foot() {
+    // Check that we're on the correct page before loading assets.
+    if ( self::current_route() == 'pages' ) {
+      return self::include_js('jquery.page-reorder.min.js');
+    } else {
+      return "";
+    }
   }
 
   /**
    *  Handle the update of folder names as a callback to the JS reordering.
    */
-  function reorder_folders() {
+  public function reorder() {
 
     // Get current user, to check if we're logged in.
     if ( ! Statamic_Auth::get_current_user()) {
@@ -31,11 +39,18 @@ class Hooks_pagereorder extends Hooks {
     $app = \Slim\Slim::getInstance();
 
     // Get POST data from request.
-    $order      = $app->request()->get('order');
-    $return_url = $app->request()->getReferer();
+    $order = $app->request()->post('order');
 
     // Make sure we've got a response.
-    if ( !isset($order) ) { return false; }
+    if ( !isset($order) || strlen($order) == 0 ) {
+      $message = Array(
+        "status" => "error",
+        "message" => "No page order data received. Please try again."
+      );
+
+      echo json_encode($message);
+      return false;
+    }
 
     // Get '_content' dir.
     $content_path = Statamic::get_content_root();
@@ -87,22 +102,31 @@ class Hooks_pagereorder extends Hooks {
         $old_path = $folder_path.$old_name;
 
         // Rename folder unless the old and new names are identical.
-        if ( $new_name !== $old_name ) {
+        if ( $new_path !== $old_path ) {
           rename($old_path, $new_path);
         }
       } else {
-        // If we couldn't find a match, bail out with a message.
-        $app->flash('error', 'There was an error saving your page order. Please try again or ask for help in the forums.');
-        $app->redirect( $return_url );
+        // We end up here if we've failed to match a folder/slug/url.
+        // This is usually a sign that something was renamed and the
+        // page wasn't refreshed thus working with outdated file paths/urls.
+        
+        // Bail out with message.
+        $message = Array(
+          "status" => "error",
+          "message" => "There was an error saving your page order. Please try again."
+        );
 
+        echo json_encode($message);
         return false;
       }
     }
 
-    // Success, back to the page tree.
-    $app->flash('success', 'Page order saved successfully!');
-    $app->redirect( $return_url );
+    $message = Array(
+      "status" => "success",
+      "message" => "Page order saved successfully!"
+    );
 
+    echo json_encode($message);
     return true;
   }
 
