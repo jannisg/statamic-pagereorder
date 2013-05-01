@@ -22,6 +22,12 @@ The drag and drop however needs the native HTML5 drag and drop api to work. If y
 
 If there is a need for it, I could look at adding fall back support for this using something like jQuery UI: Sortable for older browsers.
 
+## Browser Support
+
+This add-on has been tested successfully in: Chrome, Safari, Firefox and Internet Explorer 10.
+
+Support for Internet Explorer 9 and lower could potentially be added, please file a GitHub issue if you'd like to see IE8/9 support.
+
 ## What should you expect
 
 1. Visiting the control panel's ("Pages") page, you will be able to drag and drop each **top level** page by clicking on the drag handle located to the left of the page title.
@@ -30,8 +36,6 @@ If there is a need for it, I could look at adding fall back support for this usi
 
 ## To Do
 
-- Have someone with better PHP skills code-review my code.
-- Cross-browser test the JavaScript and CSS delivered by the add-on.
 - Look into "subpages" reordering though this may be complicated by date sorting and other semantic ordering processes.
 - Touch support
 
