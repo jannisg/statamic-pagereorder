@@ -36,8 +36,6 @@ Support for Internet Explorer 9 and lower could potentially be added, please fil
 
 ## To Do
 
-- Have someone with better PHP skills code-review my code.
-- Cross-browser test the JavaScript and CSS delivered by the add-on.
 - Look into "subpages" reordering though this may be complicated by date sorting and other semantic ordering processes.
 - Touch support
 
