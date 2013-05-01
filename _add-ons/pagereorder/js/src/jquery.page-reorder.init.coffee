@@ -68,8 +68,6 @@ $ ->
     undefined
 
   ### Vars ###
-  useAjax  = yes
-
   $tree = $('#page-tree')
   $subs = $tree.find('.subpages')
 
@@ -138,36 +136,25 @@ $ ->
       # Store a JSON String of our new order.
       orderJSON = JSON.stringify order
 
-      if useAjax
-        # Send JSON to PHP function using AJAX
-        url = '/TRIGGER/pagereorder/reorder'
+      # Send JSON to PHP function using AJAX
+      url = '/TRIGGER/pagereorder/reorder'
 
-        $.ajax url,
-          type: 'POST'
-          data:
-            order: orderJSON
-          complete: (jqxhr) ->
-            # Parse the JSON return data.
-            message = $.parseJSON( jqxhr.responseText ) if jqxhr.responseText
+      $.ajax url,
+        type: 'POST'
+        data:
+          order: orderJSON
+        complete: (jqxhr) ->
+          # Parse the JSON return data.
+          message = $.parseJSON( jqxhr.responseText ) if jqxhr.responseText
 
-            # Send Flash message based on outcome. Success of failure.
-            $flashBar.triggerHandler 'flash', message
+          # Send Flash message based on outcome. Success of failure.
+          $flashBar.triggerHandler 'flash', message
 
-          error: (jqxhr, status, error) ->
-            # Show Flash Message.
-            $flashBar.triggerHandler 'flash',
-              status: 'error',
-              message: 'There was an error saving your page order. Please try again.'
-
-      else
-        # Use window.location based routing.
-
-        # Build a URL to ping.
-        location = window.location
-        url = "#{location.protocol}//#{location.host}/TRIGGER/pagereorder/reorder_folders?order=#{orderJSON}"
-
-        # Action the request to trigger the reodering.
-        window.location = url
+        error: (jqxhr, status, error) ->
+          # Show Flash Message for errors.
+          $flashBar.triggerHandler 'flash',
+            status: 'error',
+            message: 'There was an error saving your page order. Please try again.'
 
       undefined
 

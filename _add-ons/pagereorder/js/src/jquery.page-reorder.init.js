@@ -14,7 +14,7 @@ Web:      http://jannisgundermann.com/
     /* Feature Tests
     */
 
-    var $flashBar, $sortable, $subs, $tree, active_class, eligible_class, flashes, hasDragAndDrop, icon_markup, ignore_class, namespace, useAjax;
+    var $flashBar, $sortable, $subs, $tree, active_class, eligible_class, flashes, hasDragAndDrop, icon_markup, ignore_class, namespace;
 
     hasDragAndDrop = 'draggable' in document.createElement('span');
     if (!hasDragAndDrop) {
@@ -64,7 +64,6 @@ Web:      http://jannisgundermann.com/
     /* Vars
     */
 
-    useAjax = true;
     $tree = $('#page-tree');
     $subs = $tree.find('.subpages');
     namespace = 'page-order';
@@ -113,7 +112,7 @@ Web:      http://jannisgundermann.com/
         });
       },
       'sortupdate': function(e) {
-        var $page, location, order, orderJSON, page, pages, url;
+        var $page, order, orderJSON, page, pages, url;
 
         pages = $(this).find('> .page');
         order = (function() {
@@ -131,33 +130,27 @@ Web:      http://jannisgundermann.com/
           return _results;
         })();
         orderJSON = JSON.stringify(order);
-        if (useAjax) {
-          url = '/TRIGGER/pagereorder/reorder';
-          $.ajax(url, {
-            type: 'POST',
-            data: {
-              order: orderJSON
-            },
-            complete: function(jqxhr) {
-              var message;
+        url = '/TRIGGER/pagereorder/reorder';
+        $.ajax(url, {
+          type: 'POST',
+          data: {
+            order: orderJSON
+          },
+          complete: function(jqxhr) {
+            var message;
 
-              if (jqxhr.responseText) {
-                message = $.parseJSON(jqxhr.responseText);
-              }
-              return $flashBar.triggerHandler('flash', message);
-            },
-            error: function(jqxhr, status, error) {
-              return $flashBar.triggerHandler('flash', {
-                status: 'error',
-                message: 'There was an error saving your page order. Please try again.'
-              });
+            if (jqxhr.responseText) {
+              message = $.parseJSON(jqxhr.responseText);
             }
-          });
-        } else {
-          location = window.location;
-          url = "" + location.protocol + "//" + location.host + "/TRIGGER/pagereorder/reorder_folders?order=" + orderJSON;
-          window.location = url;
-        }
+            return $flashBar.triggerHandler('flash', message);
+          },
+          error: function(jqxhr, status, error) {
+            return $flashBar.triggerHandler('flash', {
+              status: 'error',
+              message: 'There was an error saving your page order. Please try again.'
+            });
+          }
+        });
         return void 0;
       }
     });
