@@ -5,6 +5,8 @@ class Hooks_pagereorder extends Hooks {
    *  We'll add our CSS styles to the head here.
    */
   public function control_panel__add_to_head() {
+    // If we're not on the /pages page, then don't load the CSS.
+    if ( URL::getCurrent(false) != '/pages' ) { return ""; }
     return $this->css->link('page-reorder.min.css');
   }
 
@@ -12,6 +14,8 @@ class Hooks_pagereorder extends Hooks {
    *  We'll add our JavaScript just before the </body> tag.
    */
   public function control_panel__add_to_foot() {
+    // If we're not on the /pages page, then don't load the JS.
+    if ( URL::getCurrent(false) != '/pages' ) { return ""; }
     return $this->js->link('jquery.page-reorder.min.js');
   }
 
