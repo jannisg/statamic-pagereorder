@@ -4,8 +4,8 @@ Author:   Jannis Gundermann
 Twitter:  @jannisg
 Web:      http://jannisgundermann.com/
 
-@license: Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
-@see:     http://creativecommons.org/licenses/by-sa/3.0/
+          Copyright 2013, Jannis Gundermann
+@license: Released under the MIT license.
 */
 
 
@@ -132,9 +132,9 @@ Web:      http://jannisgundermann.com/
         })();
         orderJSON = JSON.stringify(order);
         if (useAjax) {
-          url = '/TRIGGER/pagereorder/reorder_folders';
+          url = '/TRIGGER/pagereorder/reorder';
           $.ajax(url, {
-            type: 'GET',
+            type: 'POST',
             data: {
               order: orderJSON
             },

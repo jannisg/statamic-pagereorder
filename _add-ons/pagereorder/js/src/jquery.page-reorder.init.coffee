@@ -140,10 +140,10 @@ $ ->
 
       if useAjax
         # Send JSON to PHP function using AJAX
-        url = '/TRIGGER/pagereorder/reorder_folders'
+        url = '/TRIGGER/pagereorder/reorder'
 
         $.ajax url,
-          type: 'GET'
+          type: 'POST'
           data:
             order: orderJSON
           success: (data, status, jqxhr) ->

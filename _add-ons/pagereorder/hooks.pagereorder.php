@@ -4,23 +4,21 @@ class Hooks_pagereorder extends Hooks {
   /**
    *  We'll add our CSS styles to the head here.
    */
-  function add_to_control_panel_head() {
-    $html = self::include_css('page-reorder.min.css');
-    return $html;
+  public function control_panel__add_to_head() {
+    return $this->css->link('page-reorder.min.css');
   }
 
   /**
    *  We'll add our JavaScript just before the </body> tag.
    */
-  function add_to_control_panel_foot() {
-    $html = self::include_js('jquery.page-reorder.min.js');
-    return $html;
+  public function control_panel__add_to_foot() {
+    return $this->js->link('jquery.page-reorder.min.js');
   }
 
   /**
    *  Handle the update of folder names as a callback to the JS reordering.
    */
-  function reorder_folders() {
+  public function pagereorder__reorder() {
 
     // Get current user, to check if we're logged in.
     if ( ! Statamic_Auth::get_current_user()) {
@@ -31,7 +29,7 @@ class Hooks_pagereorder extends Hooks {
     $app = \Slim\Slim::getInstance();
 
     // Get POST data from request.
-    $order      = $app->request()->get('order');
+    $order      = $app->request()->post('order');
     $return_url = $app->request()->getReferer();
 
     // Make sure we've got a response.
