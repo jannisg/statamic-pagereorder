@@ -7,6 +7,7 @@ class Hooks_pagereorder extends Hooks {
   public function control_panel__add_to_head() {
     // If we're not on the /pages page, then don't load the CSS.
     if ( URL::getCurrent(false) != '/pages' ) { return ""; }
+
     return $this->css->link('page-reorder.min.css');
   }
 
@@ -16,6 +17,7 @@ class Hooks_pagereorder extends Hooks {
   public function control_panel__add_to_foot() {
     // If we're not on the /pages page, then don't load the JS.
     if ( URL::getCurrent(false) != '/pages' ) { return ""; }
+
     return $this->js->link('jquery.page-reorder.min.js');
   }
 
@@ -29,18 +31,25 @@ class Hooks_pagereorder extends Hooks {
       exit("Invalid Request");
     }
 
-    // Create App Instance
-    $app = \Slim\Slim::getInstance();
-
     // Get POST data from request.
-    $order      = $app->request()->post('order');
-    $return_url = $app->request()->getReferer();
+    $order = Request::post('order', false);
 
     // Make sure we've got a response.
-    if ( !isset($order) ) { return false; }
+    if ( !isset($order) || !$order ) {
+      $msg = "No page order data received. Please try again.";
+      $message = Array(
+        "status" => "error",
+        "message" => $msg
+      );
+
+      Log::error($msg, 'pagereorder');
+
+      echo json_encode($message);
+      return false;
+    }
 
     // Get '_content' dir.
-    $content_path = Statamic::get_content_root();
+    $content_path = Config::getContentRoot();
 
     // Get current folders within the content dir.
     // These are the ones we will be renaming.
@@ -89,22 +98,56 @@ class Hooks_pagereorder extends Hooks {
         $old_path = $folder_path.$old_name;
 
         // Rename folder unless the old and new names are identical.
-        if ( $new_name !== $old_name ) {
-          rename($old_path, $new_path);
-        }
-      } else {
-        // If we couldn't find a match, bail out with a message.
-        $app->flash('error', 'There was an error saving your page order. Please try again or ask for help in the forums.');
-        $app->redirect( $return_url );
+        if ( $new_path !== $old_path ) {
 
+          // Check the old path actually exists and the new one doesn't.
+          if ( Folder::exists($old_path) && !Folder::exists($new_path) ) {
+            rename($old_path, $new_path);
+
+          } else {
+            $msg = "Aborting... could not guarantee file integrity for folders: $old_path and $new_path!";
+
+            $message = Array(
+              "status" => "error",
+              "message" => $msg
+            );
+
+            Log::error($msg, 'pagereorder');
+
+            echo json_encode($message);
+            return false;
+          }
+        }
+
+      } else {
+        // We end up here if we've failed to match a folder/slug/url.
+        // This is usually a sign that something was renamed and the
+        // page wasn't refreshed thus working with outdated file paths/urls.
+        
+        // Bail out with message.
+        $msg = "There was an error saving your page order. Please try again.";
+
+        $message = Array(
+          "status" => "error",
+          "message" => $msg
+        );
+
+        Log::error($msg, 'pagereorder');
+
+        echo json_encode($message);
         return false;
       }
     }
 
-    // Success, back to the page tree.
-    $app->flash('success', 'Page order saved successfully!');
-    $app->redirect( $return_url );
+    $msg = "Page order saved successfully!";
+    $message = Array(
+      "status" => "success",
+      "message" => $msg
+    );
 
+    Log::info($msg, 'pagereorder');
+
+    echo json_encode($message);
     return true;
   }
 

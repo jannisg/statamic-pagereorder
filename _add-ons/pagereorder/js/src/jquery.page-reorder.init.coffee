@@ -146,17 +146,18 @@ $ ->
           type: 'POST'
           data:
             order: orderJSON
-          success: (data, status, jqxhr) ->
-            # Show Flash Message.
-            $flashBar.triggerHandler 'flash',
-              status: 'success',
-              message: 'Page order saved successfully!'
+          complete: (jqxhr) ->
+            # Parse the JSON return data.
+            message = $.parseJSON( jqxhr.responseText ) if jqxhr.responseText
+
+            # Send Flash message based on outcome. Success of failure.
+            $flashBar.triggerHandler 'flash', message
 
           error: (jqxhr, status, error) ->
             # Show Flash Message.
             $flashBar.triggerHandler 'flash',
               status: 'error',
-              message: 'There was an error saving your page order. Please try again or ask for help in the forums.'
+              message: 'There was an error saving your page order. Please try again.'
 
       else
         # Use window.location based routing.

@@ -138,16 +138,18 @@ Web:      http://jannisgundermann.com/
             data: {
               order: orderJSON
             },
-            success: function(data, status, jqxhr) {
-              return $flashBar.triggerHandler('flash', {
-                status: 'success',
-                message: 'Page order saved successfully!'
-              });
+            complete: function(jqxhr) {
+              var message;
+
+              if (jqxhr.responseText) {
+                message = $.parseJSON(jqxhr.responseText);
+              }
+              return $flashBar.triggerHandler('flash', message);
             },
             error: function(jqxhr, status, error) {
               return $flashBar.triggerHandler('flash', {
                 status: 'error',
-                message: 'There was an error saving your page order. Please try again or ask for help in the forums.'
+                message: 'There was an error saving your page order. Please try again.'
               });
             }
           });
