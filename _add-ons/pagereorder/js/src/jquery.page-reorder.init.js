@@ -14,7 +14,7 @@ Web:      http://jannisgundermann.com/
     /* Feature Tests
     */
 
-    var $flashBar, $sortable, $subs, $tree, active_class, eligible_class, flashes, hasDragAndDrop, icon_markup, ignore_class, namespace;
+    var $flashBar, $sortable, $subs, $tree, active_class, eligible_class, flashes, hasDragAndDrop, icon_markup, ignore_class, init_sortable, namespace, reinit_sortable, _source;
 
     hasDragAndDrop = 'draggable' in document.createElement('span');
     if (!hasDragAndDrop) {
@@ -86,23 +86,33 @@ Web:      http://jannisgundermann.com/
         return (_ref = $sortable.find('> .page-wrapper')) != null ? _ref.prepend(icon_markup) : void 0;
       }
     });
+    _source = '';
     /* Init the sortable plugin.
     */
 
-    $sortable = $('#page-tree').sortable({
-      items: "." + eligible_class,
-      handle: "." + namespace + "__block"
-    });
+    $sortable = null;
+    (init_sortable = function() {
+      return $sortable = $('#page-tree').sortable({
+        items: "." + eligible_class,
+        handle: "." + namespace + "__block"
+      });
+    })();
+    reinit_sortable = function() {
+      $tree.html(_source);
+      $sortable.sortable('destroy');
+      return init_sortable();
+    };
     /* Handle special events on sorting.
     */
 
     return $sortable.on({
       'dragstart': function(e) {
         $tree.addClass(active_class);
-        return $subs.slideUp({
+        $subs.slideUp({
           duration: 350,
           easing: 'easeInExpo'
         });
+        return _source = $tree.html();
       },
       'dragend': function(e) {
         $tree.removeClass(active_class);
@@ -137,18 +147,36 @@ Web:      http://jannisgundermann.com/
             order: orderJSON
           },
           complete: function(jqxhr) {
-            var message;
+            var a, anchors, link, links, message, _i, _j, _len, _len1;
 
             if (jqxhr.responseText) {
               message = $.parseJSON(jqxhr.responseText);
             }
-            return $flashBar.triggerHandler('flash', message);
+            $flashBar.triggerHandler('flash', message);
+            if (message.status === "success" && (message.linkage != null)) {
+              links = message.linkage;
+              for (_i = 0, _len = links.length; _i < _len; _i++) {
+                link = links[_i];
+                if (!(link.old !== link["new"])) {
+                  continue;
+                }
+                anchors = $tree.find("a[href*='" + link.old + "']");
+                for (_j = 0, _len1 = anchors.length; _j < _len1; _j++) {
+                  a = anchors[_j];
+                  a.href = a.href.replace("" + link.old, "" + link["new"]);
+                }
+              }
+            }
+            if (message.status === 'error') {
+              return reinit_sortable();
+            }
           },
           error: function(jqxhr, status, error) {
-            return $flashBar.triggerHandler('flash', {
+            $flashBar.triggerHandler('flash', {
               status: 'error',
               message: 'There was an error saving your page order. Please try again.'
             });
+            return reinit_sortable();
           }
         });
         return void 0;

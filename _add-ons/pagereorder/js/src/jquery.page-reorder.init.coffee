@@ -100,11 +100,31 @@ $ ->
 
       # Prepend the generated markup to each sortable's row.
       $sortable.find('> .page-wrapper')?.prepend icon_markup
-      
+
+  # Store the original HTML source, we will revert to this on error.
+  # We grab the html on dragstart before the dom is changed.
+  _source = ''
+
   ### Init the sortable plugin. ###
-  $sortable = $('#page-tree').sortable
-    items: ".#{eligible_class}"
-    handle: ".#{namespace}__block"
+  $sortable = null
+
+  do init_sortable = ->
+    $sortable = $('#page-tree').sortable
+      items: ".#{eligible_class}"
+      handle: ".#{namespace}__block"
+
+  # Re-init the sortable bindings.
+  reinit_sortable = ->
+
+    # Revert the HTML source to before the drag/drop.
+    $tree.html _source
+
+    # Destroy to avoid memory leaks.
+    $sortable.sortable('destroy')
+
+    # Then restart.
+    do init_sortable
+
 
   ### Handle special events on sorting. ###
   $sortable.on
@@ -114,6 +134,9 @@ $ ->
 
       # Hide subpages
       $subs.slideUp duration: 350, easing: 'easeInExpo'
+
+      # Grab the source in case we need to revert to it later.
+      _source = $tree.html()
 
     'dragend': (e) ->
       # Remove active class to $tree.
@@ -130,6 +153,7 @@ $ ->
       order = for page in pages
         $page = $ page
 
+        # Return an object to turn into JSON
         index: $page.index()
         url  : $.trim $page.find('.slug-preview').first().text()
 
@@ -143,6 +167,7 @@ $ ->
         type: 'POST'
         data:
           order: orderJSON
+
         complete: (jqxhr) ->
           # Parse the JSON return data.
           message = $.parseJSON( jqxhr.responseText ) if jqxhr.responseText
@@ -150,11 +175,29 @@ $ ->
           # Send Flash message based on outcome. Success of failure.
           $flashBar.triggerHandler 'flash', message
 
+          # On Success we need to update all links in the new data.
+          if message.status is "success" and message.linkage?
+            links = message.linkage
+
+            # Loop through links, updating all existing paths that match old and
+            # replace this with the new path if new != old.
+            for link in links when link.old isnt link.new
+              # Find and replace.
+              anchors = $tree.find "a[href*='#{link.old}']"
+              a.href = a.href.replace "#{link.old}", "#{link.new}" for a in anchors
+
+          # Revert HTML on error
+          do reinit_sortable if message.status is 'error'
+
+
         error: (jqxhr, status, error) ->
           # Show Flash Message for errors.
           $flashBar.triggerHandler 'flash',
             status: 'error',
             message: 'There was an error saving your page order. Please try again.'
+
+          # Revert HTML on error
+          do reinit_sortable
 
       undefined
 
