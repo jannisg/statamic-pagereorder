@@ -42,7 +42,7 @@ class Hooks_pagereorder extends Hooks {
     $order = $app->request()->post('order');
 
     // Make sure we've got a response.
-    if ( !isset($order) || strlen($order) == 0 ) {
+    if ( !isset($order) ) {
       $message = Array(
         "status" => "error",
         "message" => "No page order data received. Please try again."
@@ -61,6 +61,10 @@ class Hooks_pagereorder extends Hooks {
 
     // Array of page order objects.
     $page_order = json_decode( $order );
+
+    // Array to store the links of old data coupled with new data.
+    // We return this to the view so we can use JS to update the pathing on the page.
+    $links = Array();
 
     // Loop over original folder structure and rename all folders to
     // reflect the new order.
@@ -94,6 +98,9 @@ class Hooks_pagereorder extends Hooks {
         $new_name = $match->index.'-'.preg_replace("/^\/(.+)/uis", "$1", $match->url);
         $old_name = $slug;
 
+        // Add item to $links.
+        $links[] = Array( "old" => $old_name, "new" => $new_name );
+
         // Add slash to _content path, result should be '_content/'
         $folder_path = $content_path."/";
 
@@ -109,7 +116,7 @@ class Hooks_pagereorder extends Hooks {
         // We end up here if we've failed to match a folder/slug/url.
         // This is usually a sign that something was renamed and the
         // page wasn't refreshed thus working with outdated file paths/urls.
-        
+
         // Bail out with message.
         $message = Array(
           "status" => "error",
@@ -123,7 +130,8 @@ class Hooks_pagereorder extends Hooks {
 
     $message = Array(
       "status" => "success",
-      "message" => "Page order saved successfully!"
+      "message" => "Page order saved successfully!",
+      "linkage" => $links
     );
 
     echo json_encode($message);
