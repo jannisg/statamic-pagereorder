@@ -1,6 +1,13 @@
 <?php
 class Hooks_pagereorder extends Hooks {
 
+  public $meta = array(
+     'name'       => 'Page Reorder',
+     'version'    => '0.1.2',
+     'author'     => 'Jannis Gundermann',
+     'author_url' => 'http://jannisgundermann.com'
+   );
+
   /**
    *  We'll add our CSS styles to the head here.
    */

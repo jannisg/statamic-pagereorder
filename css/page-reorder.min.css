@@ -1,0 +1,11 @@
+/*!
+ * Statamic: Page Reorder
+ * https://github.com/jannisg/statamic-pagereorder
+ *
+ * Build: 0.1.2 (2013-05-07)
+ *
+ * Copyright (c) 2013 Jannis Gundermann (http://jannisgundermann.com)
+ * Released under the MIT license.
+ */
+
+#page-tree{position:relative;overflow:hidden}#page-tree,#page-tree>*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}#page-tree>.page.page-order-sortable>.page-wrapper{text-indent:0}#page-tree>.page.page-order-sortable>.page-wrapper .page-title{padding-left:0}.page-order-active .page-order-ignore .page-wrapper{background-color:hsl(47,5%,95%)!important;background-image:none!important}.page-order-active .page-order-ignore .page-wrapper,.page-order-active .page-order-ignore .page-wrapper .page-title,.page-order-active .page-order-ignore .page-wrapper .slug-preview,.page-order-active .page-order-ignore .page-wrapper .page-extras a{color:hsl(47,7%,75%)!important}.sortable-placeholder{float:left;display:block!important;height:55px!important;margin-bottom:8px!important;width:100%!important;border:1px dashed hsl(47,7%,75%)!important;background-color:hsl(47,3%,97%)!important}.page-order{display:inline-block;float:left;position:relative;width:50px;height:55px;overflow:hidden}.page-order__block{display:table;height:100%;width:100%}.page-order__icon{display:table-cell;position:relative;top:1px;vertical-align:middle;text-align:center;cursor:move;height:100%;width:100%;font-size:.7em;color:#c1bbb3}.page-order__icon:hover{color:#55524e}.page-order__icon:active{color:#1d1c1b}

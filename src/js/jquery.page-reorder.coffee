@@ -1,13 +1,3 @@
-
-###
-Author:   Jannis Gundermann
-Twitter:  @jannisg
-Web:      http://jannisgundermann.com/
-
-          Copyright 2013, Jannis Gundermann
-@license: Released under the MIT license.
-###
-
 $ ->
 
   ### Feature Tests ###
