@@ -78,18 +78,19 @@ $ ->
   ### Prepare the #page-tree nodes ###
   $tree.children().each ->
     # Node Data.
-    $sortable = $ @
-    slug  = $.trim $sortable.find('.slug-preview').first().text()
+    $sortable  = $ @
+    isSortable = $sortable.find('.page-delete').length
+    # slug       = $.trim $sortable.find('.slug-preview').first().text()
 
-    if slug is "/"
-      # Home link isn't sortable, so let's add a hook on it to signify this.
-      $sortable.addClass ignore_class
-
-    else
+    if isSortable
       $sortable.addClass eligible_class
 
       # Prepend the generated markup to each sortable's row.
       $sortable.find('> .page-wrapper')?.prepend icon_markup
+
+    else
+      # Pages aren't sortable, so let's add a hook on it to signify this.
+      $sortable.addClass ignore_class
 
   # Store the original HTML source, we will revert to this on error.
   # We grab the html on dragstart before the dom is changed.

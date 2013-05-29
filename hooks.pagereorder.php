@@ -60,7 +60,13 @@ class Hooks_pagereorder extends Hooks {
 
     // Get current folders within the content dir.
     // These are the ones we will be renaming.
-    $folders = Statamic::get_content_tree();
+    $content = Statamic::get_content_tree();
+
+    // filter array of items to only return folders.
+    function get_folders($item) {
+      return( isset($item['type']) && $item['type'] == 'folder' );
+    };
+    $folders = array_filter($content, "get_folders");
 
     // Array of page order objects.
     $page_order = json_decode( $order );
