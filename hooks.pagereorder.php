@@ -34,7 +34,7 @@ class Hooks_pagereorder extends Hooks {
   public function pagereorder__reorder() {
 
     // Get current user, to check if we're logged in.
-    if ( ! Statamic_Auth::get_current_user()) {
+    if ( ! Auth::getCurrentMember()) {
       exit("Invalid Request");
     }
 
