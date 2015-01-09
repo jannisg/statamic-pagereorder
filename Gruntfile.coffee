@@ -57,10 +57,21 @@ module.exports = (grunt) ->
       build: ['css', 'js']
       post:  ['src/**/_tmp/']
 
+    # File Copying
+    copy:
+      tmp:
+        files: [
+          expand: true
+          src: ['src/js/_tmp/jquery.*.js']
+          dest: 'js/'
+          filter: 'isFile'
+          flatten: true
+        ]
+
     # Watcher
     watch:
       files: ['src/**/*.coffee','src/vendor/*.js', 'src/**/*.css'],
-      tasks: ['default']
+      tasks: [ 'clean:build', 'coffee', 'concat', 'copy:tmp', 'cssmin', 'clean:post' ]
 
 
   # System
@@ -71,6 +82,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
+  grunt.loadNpmTasks 'grunt-contrib-copy'
   # grunt.loadNpmTasks 'grunt-contrib-jshint'
 
   # CSS
