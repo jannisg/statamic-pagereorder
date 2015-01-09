@@ -2,7 +2,7 @@
   "pretty_name": "Statamic: Page Reorder",
   "name": "page-reorder",
   "description": "A Statamic CMS add-on that adds drag and drop reordering to the main dashboard.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "homepage": "https://github.com/jannisg/statamic-pagereorder",
   "author": {
     "name": "Jannis Gundermann",

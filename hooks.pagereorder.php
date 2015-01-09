@@ -3,7 +3,7 @@ class Hooks_pagereorder extends Hooks {
 
   public $meta = array(
      'name'       => 'Page Reorder',
-     'version'    => '0.1.3',
+     'version'    => '0.2.0',
      'author'     => 'Jannis Gundermann',
      'author_url' => 'http://jannisgundermann.com'
    );

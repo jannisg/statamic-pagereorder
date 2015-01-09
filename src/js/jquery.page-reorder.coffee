@@ -11,15 +11,15 @@ $ ->
   ### Store Success/Error Templates. ###
   flashes =
     success: _.template """
-                        <div id="flash-msg" class="success">
-                          <span class="icon">8</span>
-                          <span class="msg"><%= message %></p>
+                        <div id="flash-msg" class="page-order__flash success">
+                          <span class="icon page-order__flash-icon ss-check"></span>
+                          <span class="msg page-order__flash-msg"><%= message %></p>
                         </div>
                         """
     error:   _.template """
-                        <div id="flash-msg" class="error">
-                          <span class="icon">c</span>
-                          <span class="msg"><%= message %></p>
+                        <div id="flash-msg" class="page-order__flash error">
+                          <span class="icon page-order__flash-icon ss-alert"></span>
+                          <span class="msg page-order__flash-msg"><%= message %></p>
                         </div>
                         """
 

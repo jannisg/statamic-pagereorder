@@ -46,7 +46,7 @@
 .sortable-placeholder {
   float: left;
   display: block !important;
-  height: 55px !important;
+  height: 50px !important;
   margin-bottom: 8px !important;
   width: 100% !important;
   border: 1px dashed hsl(47,7%,75%) !important;
@@ -60,9 +60,12 @@
 
   position: relative;
   width:  50px;
-  height: 55px;
+  height: 100%;
 
   overflow: hidden;
+
+  border-right: 1px solid rgba(0,0,0, .1);
+  margin-right: 10px;
 }
 .page-order__block {
   display: table;
@@ -73,14 +76,13 @@
   display: table-cell;
   position: relative;
 
-  top: 1px;
   vertical-align: middle;
   text-align: center;
   cursor: move;
 
   height: 100%;
   width:  100%;
-  font-size: .7em;
+  font-size: 1em;
 
   color: #c1bbb3;
 }
@@ -90,3 +92,11 @@
 .page-order__icon:active {
   color: #1d1c1b;
 }
+
+/* Style the flash message icon. */
+.page-order__flash {}
+  .page-order__flash-icon {
+    display: inline-block;
+    margin-right: 5px;
+  }
+  .page-order__flash-message {}
