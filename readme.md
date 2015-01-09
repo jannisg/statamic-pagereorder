@@ -12,7 +12,7 @@ Adds AJAX drag and drop reordering of the top-level pages to your [Statamic](htt
 
 ### 2. Download
 
-1. Download the `master` branch (or the `1.4.2` branch if you're using that version of Statamic)
+1. Download the `master` branch if you are using Statamic 1.5 or later (or the `1.4.2` branch if you're using that version of Statamic)
 2. Extract the downloaded archive and rename the folder to `pagereorder`.
 3. Drag this `pagereorder` folder into the `_add-ons` folder at the root of your Statamic installation.
 
@@ -71,8 +71,6 @@ If you don't have any interest in making modifications to this add-on yourself, 
 **Use at your own risk.**
 
 Check the To Do list and test things thoroughly yourself before any production use.
-
-Because the actual API documentation isn't launched until Statamic hits version 1.5, this plugin may break when 1.5 is release so be aware of that.
 
 ## Attributions
 
