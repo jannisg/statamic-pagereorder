@@ -40,14 +40,13 @@ Support for Internet Explorer 9 and lower could potentially be added, please fil
 
 ## What should you expect
 
-1. Visiting the control panel's ("Pages"/"Dashboard") page, you will be able to drag and drop each **top level** page by clicking on the drag handle located to the left of the page title.
+1. Visiting the control panel's ("Pages"/"Dashboard") page, you will be able to drag and drop each top-level page and numerically sorted subpages by clicking on the drag handle located to the left of the page title.
 2. Standalone pages are "special" and are not affected by reordering nor can you drag them anywhere.
-3. Subpages cannot currently be reordered.
+3. ~~Subpages cannot currently be reordered.~~ _This is possible with version `0.3.0`._
 
 ## To Do
 
 - Touch support
-- Look into "subpages" reordering though this may be complicated by date sorting and other semantic ordering processes.
 
 ## Source Files
 
