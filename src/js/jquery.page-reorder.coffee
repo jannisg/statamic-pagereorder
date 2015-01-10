@@ -1,3 +1,5 @@
+if typeof window.DEBUG is 'undefined' then window.DEBUG = true
+
 (($) ->
 
   ###
@@ -33,13 +35,13 @@
       # Cache the container.
       @container = $('#status-bar')
 
-      console.log('Flash :: @container', @container)
+      console.log('Flash :: @container', @container) if DEBUG
 
       # Bind the flash messages into the DOM unless we don't have the flash container.
       @bindEvents() if @container.length
 
     bindEvents: ->
-      console.log('Flash :: bindEvents')
+      console.log('Flash :: bindEvents') if DEBUG
       # Setup an event based system for showing flashes.
       @container.on 'flash', (e, data) =>
 
@@ -72,7 +74,7 @@
         undefined
 
     trigger: (data) ->
-      console.log('Flash :: trigger', data)
+      console.log('Flash :: trigger', data) if DEBUG
       # Public API method to send off Flash messages.
       @container.triggerHandler 'flash', data
 
@@ -121,7 +123,7 @@
       @bootstrap() if @list? and @itemSelector? and @API_URL?
 
     bootstrap: ->
-      console.log('Reorder :: bootstrap')
+      console.log('Reorder :: bootstrap') if DEBUG
 
       # During bootstrap we will attach classes as needed and do any DOM changes
       # to the document before the plugin is initiated.
@@ -147,20 +149,20 @@
       @init()
 
     init: ->
-      console.log('Reorder :: init')
+      console.log('Reorder :: init') if DEBUG
 
       # Initialise the jQuery Sortable plugin.
       @$sortable = @list.sortable
         items:  ".#{@itemSelector}"
         handle: "> .page-wrapper > .page-order > .#{namespace}__block"
 
-      console.log('Reorder :: @$sortable =', @$sortable)
+      console.log('Reorder :: @$sortable =', @$sortable) if DEBUG
 
       # Bind the events.
       @bindEvents()
 
     reset: ->
-      console.log('Reorder :: reset')
+      console.log('Reorder :: reset') if DEBUG
 
       # Called in the event of an error, where we want to reinstant the document
       # state to before any drag and drop related changes.
@@ -173,12 +175,12 @@
       @init()
 
     bindEvents: ->
-      console.log('Reorder :: bindEvents')
+      console.log('Reorder :: bindEvents') if DEBUG
 
       # Bind the events fired by the jQuery plugin.
       @$sortable.on
         'dragstart': (e) =>
-          console.log('Reorder :: bindEvents :: dragstart')
+          console.log('Reorder :: bindEvents :: dragstart') if DEBUG
 
           e.stopPropagation()
 
@@ -186,7 +188,7 @@
           @list.addClass active_class
 
           # Hide subpages
-          console.log('Reorder :: bindEvents :: dragstart :: @subs', @subs)
+          console.log('Reorder :: bindEvents :: dragstart :: @subs', @subs) if DEBUG
           if @subs?
             @subs.slideUp duration: 350, easing: 'easeInExpo'
 
@@ -194,7 +196,7 @@
           @source = @list.html()
 
         'dragend': (e) =>
-          console.log('Reorder :: bindEvents :: dragend')
+          console.log('Reorder :: bindEvents :: dragend') if DEBUG
 
           e.stopPropagation()
 
@@ -206,14 +208,14 @@
             @subs.slideDown duration: 700, easing: 'easeOutExpo'
 
     send: ->
-      console.log('Reorder :: send')
+      console.log('Reorder :: send') if DEBUG
 
       # Send reordering results to the API endpoint.
       if @order?
 
         request = $.post @API_URL, { order: JSON.stringify(@order) }
         request.done (data) =>
-          console.log('Reorder :: send :: request.done', data)
+          console.log('Reorder :: send :: request.done', data) if DEBUG
 
           data = JSON.parse(data)
 
@@ -250,7 +252,7 @@
           @reset() if data.status is 'error'
 
         request.fail (data) =>
-          console.log('Reorder :: send :: request.fail', data)
+          console.log('Reorder :: send :: request.fail', data) if DEBUG
           # Show Flash Message for errors.
           Flash.trigger
             status:  'error',
@@ -270,11 +272,11 @@
       super
 
     bindEvents: ->
-      console.log('ReorderTopLevel :: bindEvents')
+      console.log('ReorderTopLevel :: bindEvents') if DEBUG
 
       @$sortable.on
         'sortupdate': (e) =>
-          console.log('ReorderTopLevel :: sortupdate')
+          console.log('ReorderTopLevel :: sortupdate') if DEBUG
 
           e.stopPropagation()
 
@@ -298,11 +300,11 @@
       super
 
     bindEvents: ->
-      console.log('ReorderSubpages :: bindEvents')
+      console.log('ReorderSubpages :: bindEvents') if DEBUG
 
       @$sortable.on
         'sortupdate': (e) =>
-          console.log('ReorderSubpages :: sortupdate')
+          console.log('ReorderSubpages :: sortupdate') if DEBUG
 
           e.stopPropagation()
 
@@ -316,7 +318,7 @@
             index: $page.index()
             url  : $.trim $page.find('.slug-preview').first().text()
 
-          console.log 'ReorderSubpages :: sortupdate :: order', @order
+          console.log('ReorderSubpages :: sortupdate :: order', @order) if DEBUG
 
           @send()
 
