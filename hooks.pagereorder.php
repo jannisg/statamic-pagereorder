@@ -174,8 +174,6 @@ class Hooks_pagereorder extends Hooks {
   }
 
   public function pagereorder__reordersubpages() {
-    Log::info('pagereorder :: Running... on subpages', 'pagereorder');
-
     // 1. Check if logged in.
     // Get current user, to check if we're logged in.
     if ( ! Auth::getCurrentMember()) {
@@ -186,7 +184,7 @@ class Hooks_pagereorder extends Hooks {
 
     // 2. Find order post data
     $order = Request::post('order', false);
-    Log::info('Request order: '. $order, 'pagereorder');
+    Log::debug('Request order: '. $order, 'pagereorder');
 
     if ( $order == FALSE ) {
       $msg = "No page order data received. Please try again.";
@@ -206,10 +204,7 @@ class Hooks_pagereorder extends Hooks {
     // 3. Resolve file paths from Order object.
     $firstPage  = $page_order[0];
     $folderPath = Path::resolve($firstPage->url);
-    Log::info('folderPath = '.$folderPath, 'pagereorder');
-
     $folderName = preg_replace("/^\/([^\/]+)\/.+/ui", "$1", $folderPath);
-    Log::info('folderName = '.$folderName, 'pagereorder');
 
     $paths = Array();
 
@@ -221,8 +216,6 @@ class Hooks_pagereorder extends Hooks {
 
       // Path including the folder
       $currentPath = Path::resolve( $page->url );
-      Log::info('Current Path: '.$currentPath, 'pagereorder');
-
       // Path without numerical sorting
       $currentPage = Path::clean($currentPath);
       // Path without folder
@@ -230,11 +223,8 @@ class Hooks_pagereorder extends Hooks {
       // Path without any slashes
       $currentPage = Path::trimSlashes($currentPage);
       // At this point we're have the pure page name.
-      Log::info('Current Page: '.$currentPage, 'pagereorder');
-
       // Generate the new path
       $newPath = '/'.$folderName.'/'.$index.'-'.$currentPage;
-      Log::info('New Path: '.$newPath, 'pagereorder');
 
       $paths[] = array(
         'new' => $newPath,
@@ -244,21 +234,18 @@ class Hooks_pagereorder extends Hooks {
 
 
     // 4. Rename files and return success response or failure.
-    Log::info('Paths:'. json_encode($paths), 'pagereorder');
     if ( isset($paths) && count($paths) > 0 ) {
 
       foreach ($paths as $path) {
-        Log::info('Path:'. json_encode($path), 'pagereorder');
-
         $new = Path::tidy($content_path.'/'.$path['new']);
         $old = Path::tidy($content_path.'/'.$path['old']);
 
-        Log::info('New path='.$new, 'pagereorder');
-        Log::info('Old path='.$old, 'pagereorder');
+        Log::debug('New path='.$new, 'pagereorder');
+        Log::debug('Old path='.$old, 'pagereorder');
 
         if ( $old !== $new ) {
           if ( Folder::exists($old) && !Folder::exists($new) ) {
-            Log::info('Renaming file.', 'pagereorder');
+            Log::debug('Renaming file.', 'pagereorder');
             Folder::move($old, $new);
           } else {
             // We end up here if we've failed to match a folder/slug/url.
