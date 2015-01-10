@@ -36,6 +36,11 @@ module.exports = (grunt) ->
         preserveComments: 'some'
         report: 'gzip'
         banner: '<%= banner %>'
+        compress:
+          global_defs:
+            "DEBUG": false
+          dead_code: true
+
       dist:
         files:
           'js/jquery.<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
