@@ -1,66 +1,88 @@
-$ ->
+(($) ->
 
-  ### Feature Tests ###
+  ###
+  # SUPPORT CHECKS BEFORE INIT
+  ###
+
+  # Feature Tests
   hasDragAndDrop = ('draggable' of document.createElement('span') )
 
   # Bail if we don't have a device that supports the HTML5 Drag and Drop API
   return false unless hasDragAndDrop
 
-  ### Setup Flash Message JS Helper ###
+  ###
+  # FLASH MESSAGE JS HELPER
+  ###
 
-  ### Store Success/Error Templates. ###
-  flashes =
-    success: _.template """
-                        <div id="flash-msg" class="page-order__flash success">
-                          <span class="icon page-order__flash-icon ss-check"></span>
-                          <span class="msg page-order__flash-msg"><%= message %></p>
-                        </div>
-                        """
-    error:   _.template """
-                        <div id="flash-msg" class="page-order__flash error">
-                          <span class="icon page-order__flash-icon ss-alert"></span>
-                          <span class="msg page-order__flash-msg"><%= message %></p>
-                        </div>
-                        """
+  class Flash
+    constructor: ->
+      # Store Success/Error Templates.
+      @tmpl =
+        success: _.template """
+                            <div id="flash-msg" class="page-order__flash success">
+                              <span class="icon page-order__flash-icon ss-check"></span>
+                              <span class="msg page-order__flash-msg"><%= message %></p>
+                            </div>
+                            """
+        error:   _.template """
+                            <div id="flash-msg" class="page-order__flash error">
+                              <span class="icon page-order__flash-icon ss-alert"></span>
+                              <span class="msg page-order__flash-msg"><%= message %></p>
+                            </div>
+                            """
+      # Cache the container.
+      @container = $('#status-bar')
 
-  ### Cache the container. ###
-  $flashBar = $ '#status-bar'
+      console.log('Flash :: @container', @container)
 
-  ### Setup an event based system for showing flashes. ###
-  $flashBar.on 'flash', (e, data) ->
+      # Bind the flash messages into the DOM unless we don't have the flash container.
+      @bindEvents() if @container.length
 
-    # delay for the appearance of the new flash message.
-    delay = 50
+    bindEvents: ->
+      console.log('Flash :: bindEvents')
+      # Setup an event based system for showing flashes.
+      @container.on 'flash', (e, data) =>
 
-    # Check if we have any existing messages, if so remove them.
-    if $('#flash-msg').length
-      # Increase the delay to be the fadeOut animation time.
-      delay = 150
-      # Remove existing flash message by fading it out.
-      $existingMessage = $ '#flash-msg'
-      $existingMessage.stop(true).fadeOut delay, ->
-        $existingMessage.remove()
+        # delay for the appearance of the new flash message.
+        delay = 50
 
-    # Generate markup with template.
-    html = flashes[data.status]({message: data.message})
+        # Check if we have any existing messages, if so remove them.
+        if $('#flash-msg').length
+          # Increase the delay to be the fadeOut animation time.
+          delay = 150
+          # Remove existing flash message by fading it out.
+          $existingMessage = $ '#flash-msg'
+          $existingMessage.stop(true).fadeOut delay, ->
+            $existingMessage.remove()
 
-    # Add markup to the container
-    $flashBar.prepend html
+        # Generate markup with template.
+        html = @tmpl[data.status]({message: data.message})
 
-    # Animate the message.
-    $('#flash-msg')
-      .delay(delay)
-      .animate({'margin-top' : '0'}, 900, 'easeOutBounce')
-      .delay(3000)
-      .animate {'margin-top' : '-74px'}, 900, 'easeInOutBack', ->
-        $(@).remove()
+        # Add markup to the container
+        @container.prepend html
 
-    undefined
+        # Animate the message.
+        $('#flash-msg')
+          .delay(delay)
+          .animate({'margin-top' : '0'}, 900, 'easeOutBounce')
+          .delay(3000)
+          .animate {'margin-top' : '-74px'}, 900, 'easeInOutBack', ->
+            $(@).remove()
 
-  ### Vars ###
+        undefined
+
+    trigger: (data) ->
+      console.log('Flash :: trigger', data)
+      # Public API method to send off Flash messages.
+      @container.triggerHandler 'flash', data
+
+  ###
+  # VARIABLES
+  ###
   $tree = $('#page-tree')
   $subs = $tree.find('.subpages')
 
+  sortableOptions = {}
   namespace      = 'page-order'
 
   active_class   = "#{namespace}-active"
@@ -75,120 +97,243 @@ $ ->
                    </div>
                    """
 
-  ### Prepare the #page-tree nodes ###
-  $tree.children().each ->
-    # Node Data.
-    $sortable  = $ @
-    isSortable = $sortable.find('.page-delete').length
-    # slug       = $.trim $sortable.find('.slug-preview').first().text()
+  ###
+  # REORDERING TOP-LEVEL PAGES
+  ###
 
-    if isSortable
-      $sortable.addClass eligible_class
+  class Reorder
+    constructor: (@list, @itemSelector, @options) ->
+      @options = $.extend {}, sortableOptions, @options
 
-      # Prepend the generated markup to each sortable's row.
-      $sortable.find('> .page-wrapper')?.prepend icon_markup
+      # API Vars
+      @API_URL = "/TRIGGER/pagereorder/#{@API_KEYWORD}"
 
-    else
-      # Pages aren't sortable, so let's add a hook on it to signify this.
-      $sortable.addClass ignore_class
+      # Find child nodes of @list
+      # These should be the re-orderable items.
+      @children = @list.children()
 
-  # Store the original HTML source, we will revert to this on error.
-  # We grab the html on dragstart before the dom is changed.
-  _source = ''
+      # Find lists of subpages (if any).
+      @subs = @list.find '.subpages'
 
-  ### Init the sortable plugin. ###
-  $sortable = null
+      # Store a copy of the tree.
+      @source = @list.html()
 
-  do init_sortable = ->
-    $sortable = $('#page-tree').sortable
-      items: ".#{eligible_class}"
-      handle: ".#{namespace}__block"
+      @bootstrap() if @list? and @itemSelector? and @API_URL?
 
-  # Re-init the sortable bindings.
-  reinit_sortable = ->
+    bootstrap: ->
+      console.log('Reorder :: bootstrap')
 
-    # Revert the HTML source to before the drag/drop.
-    $tree.html _source
+      # During bootstrap we will attach classes as needed and do any DOM changes
+      # to the document before the plugin is initiated.
 
-    # Destroy to avoid memory leaks.
-    $sortable.sortable('destroy')
+      for child in @children
 
-    # Then restart.
-    do init_sortable
+        # Node Data.
+        $child  = $ child
+        isSortable = $child.find('.page-delete').length
+
+        if isSortable
+          $child.addClass eligible_class
+
+          # Prepend the generated markup to each sortable's row.
+          $child.find('> .page-wrapper')?.prepend icon_markup
+
+        else
+          # Pages aren't sortable, so let's add a hook on it to signify this.
+          $child.addClass ignore_class
 
 
-  ### Handle special events on sorting. ###
-  $sortable.on
-    'dragstart': (e) ->
-      # Assign active class to $tree.
-      $tree.addClass active_class
+      # After bootstrap routine, run init.
+      @init()
 
-      # Hide subpages
-      $subs.slideUp duration: 350, easing: 'easeInExpo'
+    init: ->
+      console.log('Reorder :: init')
 
-      # Grab the source in case we need to revert to it later.
-      _source = $tree.html()
+      # Initialise the jQuery Sortable plugin.
+      @$sortable = @list.sortable
+        items:  ".#{@itemSelector}"
+        handle: "> .page-wrapper > .page-order > .#{namespace}__block"
 
-    'dragend': (e) ->
-      # Remove active class to $tree.
-      $tree.removeClass active_class
+      console.log('Reorder :: @$sortable =', @$sortable)
 
-      # Show subpages
-      $subs.slideDown duration: 700, easing: 'easeOutExpo'
+      # Bind the events.
+      @bindEvents()
 
-    'sortupdate': (e) ->
-      # console.log "Sorting..."
-      pages = $(@).find('> .page')
+    reset: ->
+      console.log('Reorder :: reset')
 
-      # Create array of objects storing our new order.
-      order = for page in pages
-        $page = $ page
+      # Called in the event of an error, where we want to reinstant the document
+      # state to before any drag and drop related changes.
+      @list.html @source
 
-        # Return an object to turn into JSON
-        index: $page.index()
-        url  : $.trim $page.find('.slug-preview').first().text()
+      # Destroy to avoid memory leaks.
+      @$sortable.sortable('destroy') if @$sortable?
 
-      # Store a JSON String of our new order.
-      orderJSON = JSON.stringify order
+      # Then restart.
+      @init()
 
-      # Send JSON to PHP function using AJAX
-      url = '/TRIGGER/pagereorder/reorder'
+    bindEvents: ->
+      console.log('Reorder :: bindEvents')
 
-      $.ajax url,
-        type: 'POST'
-        data:
-          order: orderJSON
+      # Bind the events fired by the jQuery plugin.
+      @$sortable.on
+        'dragstart': (e) =>
+          console.log('Reorder :: bindEvents :: dragstart')
 
-        complete: (jqxhr) ->
-          # Parse the JSON return data.
-          message = $.parseJSON( jqxhr.responseText ) if jqxhr.responseText
+          e.stopPropagation()
 
-          # Send Flash message based on outcome. Success of failure.
-          $flashBar.triggerHandler 'flash', message
+          # Assign active class to @list.
+          @list.addClass active_class
+
+          # Hide subpages
+          console.log('Reorder :: bindEvents :: dragstart :: @subs', @subs)
+          if @subs?
+            @subs.slideUp duration: 350, easing: 'easeInExpo'
+
+          # Grab the source in case we need to revert to it later.
+          @source = @list.html()
+
+        'dragend': (e) =>
+          console.log('Reorder :: bindEvents :: dragend')
+
+          e.stopPropagation()
+
+          # Remove active class to $tree.
+          @list.removeClass active_class
+
+          # Show subpages
+          if @subs?
+            @subs.slideDown duration: 700, easing: 'easeOutExpo'
+
+    send: ->
+      console.log('Reorder :: send')
+
+      # Send reordering results to the API endpoint.
+      if @order?
+
+        request = $.post @API_URL, { order: JSON.stringify(@order) }
+        request.done (data) =>
+          console.log('Reorder :: send :: request.done', data)
+
+          data = JSON.parse(data)
+
+          # Send Flash message based on outcome. Success or failure.
+          Flash.trigger
+            status:  data.status
+            message: data.message
 
           # On Success we need to update all links in the new data.
-          if message.status is "success" and message.linkage?
-            links = message.linkage
+          if data.status is "success" and data.linkage?
+            links = data.linkage
 
             # Loop through links, updating all existing paths that match old and
             # replace this with the new path if new != old.
             for link in links when link.old isnt link.new
-              # Find and replace.
-              anchors = $tree.find "a[href*='#{link.old}']"
+              # Find..
+              anchors = @list.find "a[href*='#{link.old}']"
+              # ..and replace href.
               a.href = a.href.replace "#{link.old}", "#{link.new}" for a in anchors
 
+              # Must also find all data-path elements and replace the new subpath.
+              pathRegex     = new RegExp("#{link.old}", "gi")
+              pathElements  = @list.find "[data-path*='#{link.old}']"
+
+              for element in pathElements
+                $el = $ element
+                path = $el.data('path')
+
+                if pathRegex.test path
+                  newPath = path.replace "#{link.old}", "#{link.new}"
+                  $el.attr 'data-path', newPath
+
           # Revert HTML on error
-          do reinit_sortable if message.status is 'error'
+          @reset() if data.status is 'error'
 
-
-        error: (jqxhr, status, error) ->
+        request.fail (data) =>
+          console.log('Reorder :: send :: request.fail', data)
           # Show Flash Message for errors.
-          $flashBar.triggerHandler 'flash',
-            status: 'error',
+          Flash.trigger
+            status:  'error',
             message: 'There was an error saving your page order. Please try again.'
 
           # Revert HTML on error
-          do reinit_sortable
+          @reset();
 
-      undefined
+        request.always (data) =>
+          # Always remove any @order values.
+          @order = undefined
 
+
+  class ReorderTopLevel extends Reorder
+    constructor: ->
+      @API_KEYWORD = 'reorder'
+      super
+
+    bindEvents: ->
+      console.log('ReorderTopLevel :: bindEvents')
+
+      @$sortable.on
+        'sortupdate': (e) =>
+          console.log('ReorderTopLevel :: sortupdate')
+
+          e.stopPropagation()
+
+          pages = $(e.currentTarget).find('> .page')
+
+          # Create array of objects storing our new order.
+          @order = for page in pages
+            $page = $ page
+
+            # Return an object to turn into JSON
+            index: $page.index()
+            url:   $.trim $page.find('.slug-preview').first().text()
+
+          @send()
+
+      super
+
+  class ReorderSubpages extends Reorder
+    constructor: ->
+      @API_KEYWORD = 'reordersubpages'
+      super
+
+    bindEvents: ->
+      console.log('ReorderSubpages :: bindEvents')
+
+      @$sortable.on
+        'sortupdate': (e) =>
+          console.log('ReorderSubpages :: sortupdate')
+
+          e.stopPropagation()
+
+          pages = $(e.currentTarget).find('> .page')
+
+          # Create array of objects storing our new order.
+          @order = for page in pages
+            $page = $ page
+
+            # Return an object to turn into JSON
+            index: $page.index()
+            url  : $.trim $page.find('.slug-preview').first().text()
+
+          console.log 'ReorderSubpages :: sortupdate :: order', @order
+
+          @send()
+
+      super
+
+  ###
+  # INSTANCES
+  ###
+
+  # Flash Messaging
+  Flash = new Flash()
+
+  # Top Level Pages
+  Master = new ReorderTopLevel( $tree, eligible_class )
+
+  # All Subpage trees
+  Subpages = []
+  for subpageTree in $subs
+    Subpages.push new ReorderSubpages( $(subpageTree), eligible_class )
+) jQuery
