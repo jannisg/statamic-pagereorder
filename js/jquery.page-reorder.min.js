@@ -2,7 +2,7 @@
  * Statamic: Page Reorder
  * https://github.com/jannisg/statamic-pagereorder
  *
- * Build: 0.2.0 (2015-01-10)
+ * Build: 0.3.0 (2015-01-10)
  *
  * Copyright (c) 2015 Jannis Gundermann (http://jannisgundermann.com)
  * Released under the MIT license.
