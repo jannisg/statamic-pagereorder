@@ -1,9 +1,16 @@
 /**
  *  Fixes the slightly broken CSS styles of Statamic
  */
-#page-tree {
+#page-tree,
+#page-tree .subpages {
   position: relative;
   overflow: hidden;
+}
+#page-tree .page-order-sortable .page-order + .toggle-children {
+  display: inline-block;
+  min-width: 50px;
+  margin-left: -10px;
+  margin-right: 10px;
 }
 
 /* Adds better sizing so the borders are rendered correctly. */
@@ -15,8 +22,8 @@
 }
 
 /* Tweaks the spacing around the page title. */
-#page-tree > .page.page-order-sortable > .page-wrapper { text-indent: 0; }
-#page-tree > .page.page-order-sortable > .page-wrapper .page-title { padding-left: 0; }
+#page-tree .page.page-order-sortable > .page-wrapper { text-indent: 0; }
+#page-tree .page.page-order-sortable > .page-wrapper .page-title { padding-left: 0; }
 
 
 /**
